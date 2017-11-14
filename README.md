@@ -10,7 +10,7 @@ How To Use
 
 * Copy the provided `config-blank.py` file and save as `config.py`. Update the various setting in the config file to meeting you requirements.
 * This should include the URL and credentials for your Genius hub and email address details.
-* To use 
+* Look for corresponding HGMirror project for web site to display values.
 
 ### Status.py
 
