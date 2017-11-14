@@ -68,24 +68,28 @@ def getzonelist(wholehouse):
 
     zones = wholehouse['mappings']
     # Find the zones
-    for value in zones.items():
-        data = getjson(value[0])
-        if data != {}:
-            zone = {}
-            datapoints = data['datapoints']
-            for item in datapoints:
-                name = getpath(item['path'])
-                if name not in zone:
-                    zone[name] = {}
-                    node = list(filter(lambda x, lookup=name: x['addr'] == lookup,
-                                       data['nodes']))[0]
-                    zone[name]['lastseen'] = node['childValues']['lastComms']['val']
+    for key, pair in sorted(zones.items()):
+        if key != '0':
+            data = getjson(key)
+            if data != {}:
+                zone = {}
+                datapoints = data['datapoints']
+                for item in datapoints:
+                    name = getpath(item['path'])
+                    if name not in zone:
+                        zone[name] = {}
+                        node = list(filter(lambda x, lookup=name: x['addr'] == lookup,
+                                        data['nodes']))[0]
+                        zone[name]['lastseen'] = node['childValues']['lastComms']['val']
 
-                val = item['val']
-                addr = item['addr']
-                zone[name][addr] = val
+                    val = item['val']
+                    addr = item['addr']
+                    zone[name][addr] = val
 
-            roomlist[data['strName']] = setzonetype(zone)
+                zone = setzonetype(zone)
+                roomlist[data['strName']] = {'zone': zone, 'bIsActive': data['bIsActive'],
+                                            'bOutRequestHeat': data['bOutRequestHeat']}
+
 
     return roomlist
 
@@ -106,12 +110,13 @@ def convertzonelist(datalist, wholehouse):
     for zone in datalist.items():
         node_short_list = []
         zone_name, nodes = zone
-        for node in nodes.items():
+        for node in nodes['zone'].items():
             node_id, readings = node
             node_short_list.append({'node_id': node_id, 'node_type': readings['type']})
             node_list[node_id] = readings
 
-        result['zones'].append({'name': zone_name,
+        result['zones'].append({'name': zone_name, 'bIsActive': nodes['bIsActive'],
+                                'bOutRequestHeat': nodes['bOutRequestHeat'],
                                 'nodes': sorted(node_short_list,
                                                 key=lambda x: x['node_type'], reverse=True)})
 
