@@ -133,7 +133,9 @@ USER = AUTH.sign_in_with_email_and_password(config.FIREBASE_USER, config.FIREBAS
 # Get a reference to the database service
 DATABASE = FIREBASE.database()
 
-
+# Calculate the number of time required before a 1 hour token expiry (go for half-life)
+REFRESH_LOOP = 60 * 60 / config.REFRESH_INTERVAL * 2
+PASSES_TO_NEXT_REFRESH = REFRESH_LOOP
 
 # Loop collecting the data
 while True:
@@ -147,6 +149,12 @@ while True:
     # Converts into arrays
     DATA = convertzonelist(ZONE_LIST, WHOLEHOUSE)
 
+    # before the 1 hour expiry:
+    PASSES_TO_NEXT_REFRESH -= 1
+    if PASSES_TO_NEXT_REFRESH <= 0:
+        USER = AUTH.refresh(USER['refreshToken'])    
+        PASSES_TO_NEXT_REFRESH = REFRESH_LOOP
+    
     # Write to Firebase
     DATABASE.child("data").update(DATA, USER['idToken'])
 
