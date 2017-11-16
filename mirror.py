@@ -4,7 +4,7 @@ import time
 import json
 import requests
 import config
-from firebase import firebase
+import pyrebase
 
 
 # Payload to get status - this is just a guess but appears to work.
@@ -115,10 +115,25 @@ def convertzonelist(datalist, wholehouse):
 
 
 # connect to firebase
-AUTH = firebase.FirebaseAuthentication(config.FIREBASE_PASSWORD, config.FIREBASE_USER)
-USER = AUTH.get_user()
-FIRE = firebase.FirebaseApplication(config.FIREBASE_URL, None)
-firebase.authentication = AUTH
+FIRE_CONFIG = {
+    "apiKey": config.FIREBASE_API_KEY,
+    "authDomain": config.FIREBASE_AUTH_DOMAIN,
+    "databaseURL": config.FIREBASE_DATABASE_URL,
+    "storageBucket": config.FIREBASE_STORAGE_BUCKET
+}
+
+FIREBASE = pyrebase.initialize_app(FIRE_CONFIG)
+
+# Get a reference to the auth service
+AUTH = FIREBASE.auth()
+
+# Log the user in
+USER = AUTH.sign_in_with_email_and_password(config.FIREBASE_USER, config.FIREBASE_PASSWORD)
+
+# Get a reference to the database service
+DATABASE = FIREBASE.database()
+
+
 
 # Loop collecting the data
 while True:
@@ -133,7 +148,7 @@ while True:
     DATA = convertzonelist(ZONE_LIST, WHOLEHOUSE)
 
     # Write to Firebase
-    FIRE.put('/', 'data', DATA)
+    DATABASE.child("data").update(DATA, USER['idToken'])
 
     # wait for next interval
     time.sleep(config.REFRESH_INTERVAL)

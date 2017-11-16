@@ -125,10 +125,9 @@ def convertzonelist(datalist, wholehouse):
 
 
 # connect to firebase
-AUTH = firebase.FirebaseAuthentication(config.FIREBASE_PASSWORD, config.FIREBASE_USER)
+AUTH = firebase.FirebaseAuthentication(config.FIREBASE_SECRET, config.FIREBASE_USER, extra={'id': config.FIREBASE_PASSWORD})
+FIRE = firebase.FirebaseApplication(config.FIREBASE_URL, AUTH)
 USER = AUTH.get_user()
-FIRE = firebase.FirebaseApplication(config.FIREBASE_URL, None)
-firebase.authentication = AUTH
 
 # Loop collecting the data
 while True:
@@ -143,7 +142,8 @@ while True:
     DATA = convertzonelist(ZONE_LIST, WHOLEHOUSE)
 
     # Write to Firebase
-    FIRE.put('/', 'data', DATA)
+    result = FIRE.put('/', 'data', DATA)
+    print(result)
 
     # wait for next interval
     time.sleep(config.REFRESH_INTERVAL)
