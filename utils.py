@@ -31,10 +31,19 @@ def getjsonfromfile(identifier):
 
 GETJSON = getjsonfromhttp
 
+def putjson(identifier, data):
+    """ write the json from the supplied zone identifier """
+    writejson(str(identifier) + '.json', data)
+
+
+def writejson(filename, data):
+    """ write the json to the supplied filename """
+    with open(filename, 'w') as outfile:
+        json.dump(data, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+
 def write_to_file(data):
     """ writes json data to file 'zonelist.json' """
-    with open('zonelist.json', 'w') as outfile:
-        json.dump(data, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+    writejson('zonelist.json', data)
 
 
 def setzonetype(area):
@@ -62,6 +71,7 @@ def getzonelist(wholehouse):
     zones = wholehouse['mappings']
     # Find the zones
     for key, pair in sorted(zones.items()):
+        pair = pair
         if key != '0':
             data = GETJSON(key)
             if data != {}:
