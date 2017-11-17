@@ -3,7 +3,7 @@ import utils
 
 
 # List to hold results
-ZONES = utils.GETJSON(0)['data']['mappings']
+ZONES = utils.GETJSON(0)['mappings']
 # Find the zones
 for value in ZONES.items():
     data = utils.GETJSON(value[0])
