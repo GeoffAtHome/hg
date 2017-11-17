@@ -10,10 +10,19 @@ GET_STATUS = '{"iMode":0}'
 
 def getjsonfromhttp(identifier):
     """ gets the json from the supplied zone identifier """
+    data = GETFULLJSON(identifier)
+    if data != {}:
+        return data['data']
+
+    return {}
+
+
+def GETFULLJSON(identifier):
+    """ gets the json from the supplied zone identifier """
     url = config.HG_URL + ":1223/v2/zone/" + str(identifier) +"?sig=" + config.HG_SIG
     response = requests.put(url, data=GET_STATUS)
     if response.status_code == 200:
-        return json.loads(response.text)['data']
+        return json.loads(response.text)
 
     return {}
 

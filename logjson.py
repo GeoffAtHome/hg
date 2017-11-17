@@ -3,9 +3,9 @@ import utils
 
 
 # List to hold results
-ZONES = utils.GETJSON(0)['mappings']
+ZONES = utils.GETFULLJSON(0)['data']['mappings']
 # Find the zones
 for value in ZONES.items():
-    data = utils.GETJSON(value[0])
+    data = utils.GETFULLJSON(value[0])
     if data != {}:
         utils.putjson(value[0], data)
