@@ -26,7 +26,7 @@ USER = AUTH.sign_in_with_email_and_password(config.FIREBASE_USER, config.FIREBAS
 DATABASE = FIREBASE.database()
 
 # Calculate the number of time required before a 1 hour token expiry (go for half-life)
-REFRESH_LOOP = 60 * 60 / config.REFRESH_INTERVAL * 2
+REFRESH_LOOP = 60 * 60 / (config.REFRESH_INTERVAL * 2)
 PASSES_TO_NEXT_REFRESH = REFRESH_LOOP
 
 # Loop collecting the data
