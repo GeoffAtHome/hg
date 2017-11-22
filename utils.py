@@ -11,11 +11,16 @@ GET_STATUS = '{"iMode":0}'
 def getjsonfromhttp(identifier):
     """ gets the json from the supplied zone identifier """
     url = config.HG_URL + ":1223/v2/zone/" + str(identifier) +"?sig=" + config.HG_SIG
-    response = requests.put(url, data=GET_STATUS)
-    if response.status_code == 200:
-        return json.loads(response.text)['data']
+    try:
+        response = requests.put(url, data=GET_STATUS)
+        if response.status_code == 200:
+            return json.loads(response.text)['data']
 
-    return {}
+        return {}
+
+    except Exception as ex:
+        print("Failed requests in getjsonfromhttp")
+        print(ex)
 
 
 def getjsonfromfile(identifier):

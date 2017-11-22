@@ -29,23 +29,39 @@ DATABASE = FIREBASE.database()
 REFRESH_LOOP = 60 * 60 / (config.REFRESH_INTERVAL * 2)
 PASSES_TO_NEXT_REFRESH = REFRESH_LOOP
 
+# Count the readings
+COUNT = 0
+
+# Get the root info
+print(time.asctime(), "START:")
+WHOLEHOUSE = utils.GETJSON(0)
+
 # Loop collecting the data
 while True:
-    # Get the data
-    WHOLEHOUSE = utils.GETJSON(0)
-    ZONE_LIST = utils.getzonelist(WHOLEHOUSE)
+    try:
+        # Get the data
+        print(time.asctime(), "READING:")
+        ZONE_LIST = utils.getzonelist(WHOLEHOUSE)
 
-    # Converts into arrays
-    DATA = utils.convertzonelist(ZONE_LIST, WHOLEHOUSE)
+        # Converts into arrays
+        print(time.asctime(), "CONVERTING:")
+        DATA = utils.convertzonelist(ZONE_LIST, WHOLEHOUSE)
 
-    # before the 1 hour expiry:
-    PASSES_TO_NEXT_REFRESH -= 1
-    if PASSES_TO_NEXT_REFRESH <= 0:
-        USER = AUTH.refresh(USER['refreshToken'])
-        PASSES_TO_NEXT_REFRESH = REFRESH_LOOP
+        # before the 1 hour expiry:
+        PASSES_TO_NEXT_REFRESH -= 1
+        if PASSES_TO_NEXT_REFRESH <= 0:
+            USER = AUTH.refresh(USER['refreshToken'])
+            PASSES_TO_NEXT_REFRESH = REFRESH_LOOP
 
-    # Write to Firebase
-    DATABASE.child("data").update(DATA, USER['idToken'])
+        # Write to Firebase
+        print(time.asctime(), "SAVING:")
+        DATABASE.child("data").update(DATA, USER['idToken'])
+
+        COUNT +=1
+        print(time.asctime(), COUNT)
+
+    except Exception as ex:
+        print(ex)
 
     # wait for next interval
     time.sleep(config.REFRESH_INTERVAL)
