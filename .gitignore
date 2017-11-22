@@ -23,8 +23,5 @@
 23Study socket .json
 25Kitchen socket .json
 zonelist.json
-__pycache__/config.cpython-35.pyc
+__pycache__/
 config.py
-__pycache__/config.cpython-36.pyc
-__pycache__/config.cpython-36.pyc
-__pycache__/utils.cpython-36.pyc

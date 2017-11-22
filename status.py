@@ -1,29 +1,15 @@
 ''' program to email when a battery is low (below THRESHOLD in config file) '''
-import json
 import smtplib
-import requests
 import config
-
-# Payload to get status - this is just a guess but appears to work.
-GET_STATUS = '{"iMode":0}'
-
-def my_getjson(identifier):
-    """ gets the json from the supplied zone identifier """
-    url = config.HG_URL + ":1223/v2/zone/" + str(identifier) +"?sig=" + config.HG_SIG
-    response = requests.put(url, data=GET_STATUS)
-    if response.status_code == 200:
-        return json.loads(response.text)['data']
-
-    return {}
-
+import utils
 
 # List to hold results
 DEVICE_LIST = []
 BAD_LIST = []
-ZONES = getjson(0)['mappings']
+ZONES = utils.GETJSON(0)['mappings']
 # Find the zones
 for value in ZONES.items():
-    data = getjson(value[0])
+    data = utils.GETJSON(value[0])
     if data != {}:
         room = data['strName']
         nodes = data['nodes']
@@ -50,7 +36,7 @@ for result in DEVICE_LIST:
     print(result)
 
 # Email bad list
-if len(BAD_LIST) > 0:
+if BAD_LIST:
     BAD_LIST = sorted(BAD_LIST, key=lambda x: int(x.split(':')[0]))
     print("Sending message")
     # Build message to send

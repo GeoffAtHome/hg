@@ -10,13 +10,28 @@ GET_STATUS = '{"iMode":0}'
 
 def getjsonfromhttp(identifier):
     """ gets the json from the supplied zone identifier """
+    data = GETFULLJSON(identifier)
+    if data != {}:
+        return data['data']
+
+    return {}
+
+
+def GETFULLJSON(identifier):
+    """ gets the json from the supplied zone identifier """
     url = config.HG_URL + ":1223/v2/zone/" + str(identifier) +"?sig=" + config.HG_SIG
+<<<<<<< HEAD
     try:
         response = requests.put(url, data=GET_STATUS)
         if response.status_code == 200:
             return json.loads(response.text)['data']
 
         return {}
+=======
+    response = requests.put(url, data=GET_STATUS)
+    if response.status_code == 200:
+        return json.loads(response.text)
+>>>>>>> 3dc8cc6cf0d4a7ec0f65ef500ad41270a4eb226c
 
     except Exception as ex:
         print("Failed requests in getjsonfromhttp")
@@ -36,10 +51,19 @@ def getjsonfromfile(identifier):
 
 GETJSON = getjsonfromhttp
 
+def putjson(identifier, data):
+    """ write the json from the supplied zone identifier """
+    writejson(str(identifier) + '.json', data)
+
+
+def writejson(filename, data):
+    """ write the json to the supplied filename """
+    with open(filename, 'w') as outfile:
+        json.dump(data, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+
 def write_to_file(data):
     """ writes json data to file 'zonelist.json' """
-    with open('zonelist.json', 'w') as outfile:
-        json.dump(data, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+    writejson('zonelist.json', data)
 
 
 def setzonetype(area):
@@ -67,6 +91,7 @@ def getzonelist(wholehouse):
     zones = wholehouse['mappings']
     # Find the zones
     for key, pair in sorted(zones.items()):
+        pair = pair
         if key != '0':
             data = GETJSON(key)
             if data != {}:
