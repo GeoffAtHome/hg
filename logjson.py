@@ -7,5 +7,5 @@ ZONES = utils.GETFULLJSON(0)['data']['mappings']
 # Find the zones
 for value in ZONES.items():
     data = utils.GETFULLJSON(value[0])
-    if data != {}:
+    if data != None:
         utils.putjson(value[0], data)

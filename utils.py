@@ -8,6 +8,7 @@ import config
 # Payload to get status - this is just a guess but appears to work.
 GET_STATUS = '{"iMode":0}'
 
+
 def getjsonfromhttp(identifier):
     """ gets the json from the supplied zone identifier """
     data = GETFULLJSON(identifier)
@@ -19,19 +20,12 @@ def getjsonfromhttp(identifier):
 
 def GETFULLJSON(identifier):
     """ gets the json from the supplied zone identifier """
-    url = config.HG_URL + ":1223/v2/zone/" + str(identifier) +"?sig=" + config.HG_SIG
-<<<<<<< HEAD
+    url = config.HG_URL + ":1223/v2/zone/" + \
+        str(identifier) + "?sig=" + config.HG_SIG
     try:
         response = requests.put(url, data=GET_STATUS)
         if response.status_code == 200:
-            return json.loads(response.text)['data']
-
-        return {}
-=======
-    response = requests.put(url, data=GET_STATUS)
-    if response.status_code == 200:
-        return json.loads(response.text)
->>>>>>> 3dc8cc6cf0d4a7ec0f65ef500ad41270a4eb226c
+            return json.loads(response.text)
 
     except Exception as ex:
         print("Failed requests in getjsonfromhttp")
@@ -51,6 +45,7 @@ def getjsonfromfile(identifier):
 
 GETJSON = getjsonfromhttp
 
+
 def putjson(identifier, data):
     """ write the json from the supplied zone identifier """
     writejson(str(identifier) + '.json', data)
@@ -60,6 +55,7 @@ def writejson(filename, data):
     """ write the json to the supplied filename """
     with open(filename, 'w') as outfile:
         json.dump(data, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+
 
 def write_to_file(data):
     """ writes json data to file 'zonelist.json' """
@@ -110,9 +106,13 @@ def getzonelist(wholehouse):
                     zone[name][addr] = val
 
                 zone = setzonetype(zone)
-                roomlist[data['strName']] = {'zone': zone, 'bIsActive': data['bIsActive'],
+                roomlist[data['strName']] = {'zone': zone, 'iPriority': data['iPriority'],
+                                             'bIsActive': data['bIsActive'],
+                                             'iMode': data['iMode'],
+                                             'iBoostTimeRemaining': data['iBoostTimeRemaining'],
+                                             'objFootprint': data['objFootprint'] if hasattr(data, 'objFootprint') else {},
+                                             'objTimer': data['objTimer'] if hasattr(data, 'objTimer') else {},
                                              'bOutRequestHeat': data['bOutRequestHeat']}
-
 
     return roomlist
 
@@ -128,8 +128,7 @@ def getvalue(key, node):
 def getpath(path):
     """ returns the last part of the supplied path """
     pathlist = path.split('/')
-    return pathlist[len(pathlist)-1]
-
+    return pathlist[len(pathlist) - 1]
 
 
 def convertzonelist(datalist, wholehouse):
@@ -145,13 +144,19 @@ def convertzonelist(datalist, wholehouse):
         zone_name, nodes = zone
         for node in nodes['zone'].items():
             node_id, readings = node
-            node_short_list.append({'node_id': node_id, 'node_type': readings['type']})
+            node_short_list.append(
+                {'node_id': node_id, 'node_type': readings['type']})
             node_list[node_id] = readings
 
         result['zones'].append({'name': zone_name, 'bIsActive': nodes['bIsActive'],
+                                'iMode': nodes['iMode'],
+                                'iBoostTimeRemaining': nodes['iBoostTimeRemaining'],
+                                'objFootprint': ['objFootprint'],
                                 'bOutRequestHeat': nodes['bOutRequestHeat'],
-                                'nodes': sorted(node_short_list,
-                                                key=lambda x: x['node_type'], reverse=True)})
+                                'iPriority': nodes['iPriority'], 'objTimer': nodes['objTimer'],
+                                'nodes': sorted(node_short_list, key=lambda x: x['node_type'], reverse=True)})
 
     result['nodes'] = node_list
+    # Sort the zones based on priority
+    result['zones'] = sorted(result['zones'], key=lambda x: x['iPriority'])
     return result
