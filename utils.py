@@ -12,10 +12,10 @@ GET_STATUS = '{"iMode":0}'
 def getjsonfromhttp(identifier):
     """ gets the json from the supplied zone identifier """
     data = GETFULLJSON(identifier)
-    if data != {}:
+    if data != None:
         return data['data']
 
-    return {}
+    return None
 
 
 def GETFULLJSON(identifier):
@@ -30,6 +30,7 @@ def GETFULLJSON(identifier):
     except Exception as ex:
         print("Failed requests in getjsonfromhttp")
         print(ex)
+        return None
 
 
 def getjsonfromfile(identifier):
@@ -40,7 +41,7 @@ def getjsonfromfile(identifier):
             return json.load(json_data)['data']
 
     except IOError:
-        return {}
+        return None
 
 
 GETJSON = getjsonfromhttp
@@ -80,6 +81,14 @@ def setzonetype(area):
     return area
 
 
+def checkgetattr(object, attribute, default):
+    try:
+        result = object[attribute]
+        return result
+    except KeyError:
+        return default
+
+
 def getzonelist(wholehouse):
     ''' get the json data for the house '''
     roomlist = {}
@@ -90,7 +99,7 @@ def getzonelist(wholehouse):
         pair = pair
         if key != '0':
             data = GETJSON(key)
-            if data != {}:
+            if data != None:
                 zone = {}
                 datapoints = data['datapoints']
                 for item in datapoints:
@@ -110,8 +119,8 @@ def getzonelist(wholehouse):
                                              'bIsActive': data['bIsActive'],
                                              'iMode': data['iMode'],
                                              'iBoostTimeRemaining': data['iBoostTimeRemaining'],
-                                             'objFootprint': data['objFootprint'] if hasattr(data, 'objFootprint') else {},
-                                             'objTimer': data['objTimer'] if hasattr(data, 'objTimer') else {},
+                                             'objFootprint': checkgetattr(data, 'objFootprint', None),
+                                             'objTimer': checkgetattr(data, 'objTimer', None),
                                              'bOutRequestHeat': data['bOutRequestHeat']}
 
     return roomlist
