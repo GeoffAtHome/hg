@@ -33,20 +33,24 @@ PASSES_TO_NEXT_REFRESH = REFRESH_LOOP
 # Count the readings
 COUNT = 0
 
+# Switch to read JSON from file
+gu = utils.GeniusUtility(config.HG_URL, config.HG_SIG,
+                         False, config.REFRESH_INTERVAL)
+
 # Get the root info
 print(time.asctime(), "START:")
-WHOLEHOUSE = utils.GETJSON(0)
+WHOLEHOUSE = gu.GETJSON(0)
 
 # Loop collecting the data
 while True:
     try:
         # Get the data
         print(time.asctime(), "READING:")
-        ZONE_LIST = utils.getzonelist(WHOLEHOUSE)
+        ZONE_LIST = gu.getzonelist(WHOLEHOUSE)
 
         # Converts into arrays
         print(time.asctime(), "CONVERTING:")
-        DATA = utils.convertzonelist(ZONE_LIST, WHOLEHOUSE)
+        DATA = gu.convertzonelist(ZONE_LIST, WHOLEHOUSE)
 
         # before the 1 hour expiry:
         PASSES_TO_NEXT_REFRESH -= 1

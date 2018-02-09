@@ -3,14 +3,18 @@ import smtplib
 import config
 import utils
 
+
+gu = utils.GeniusUtility(config.HG_URL, config.HG_SIG,
+                         True, config.REFRESH_INTERVAL)
+
 # List to hold results
 DEVICE_LIST = []
 BAD_LIST = []
-ZONES = utils.GETJSON(0)['mappings']
+ZONES = gu.GETJSON(0)['mappings']
 # Find the zones
 for value in ZONES.items():
-    data = utils.GETJSON(value[0])
-    if data != {}:
+    data = gu.GETJSON(value[0])
+    if data != None:
         room = data['strName']
         nodes = data['nodes']
         for node in nodes:

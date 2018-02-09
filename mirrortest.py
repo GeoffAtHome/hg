@@ -1,51 +1,40 @@
 ''' This module gets the json data from the heat genius house controller
  and publishes to firebase '''
 import config
-import pyrebase
 import utils
 
-# connect to firebase
-FIRE_CONFIG = {
-    "apiKey": config.FIREBASE_API_KEY,
-    "authDomain": config.FIREBASE_AUTH_DOMAIN,
-    "databaseURL": config.FIREBASE_DATABASE_URL,
-    "storageBucket": config.FIREBASE_STORAGE_BUCKET
-}
-
-FIREBASE = pyrebase.initialize_app(FIRE_CONFIG)
-
-# Get a reference to the auth service
-AUTH = FIREBASE.auth()
-
-# Log the user in
-USER = AUTH.sign_in_with_email_and_password(
-    config.FIREBASE_USER, config.FIREBASE_PASSWORD)
-
-# Get a reference to the database service
-DATABASE = FIREBASE.database()
-
-# Calculate the number of time required before a 1 hour token expiry (go for half-life)
-REFRESH_LOOP = 60 * 60 / (config.REFRESH_INTERVAL * 2)
-PASSES_TO_NEXT_REFRESH = REFRESH_LOOP
 
 # Switch to read JSON from file
-utils.GETJSON = utils.getjsonfromfile
+gu = utils.GeniusUtility(config.HG_URL, config.HG_SIG,
+                         True, config.REFRESH_INTERVAL)
 
 # Get the data
-WHOLEHOUSE = utils.GETJSON(0)
-ZONE_LIST = utils.getzonelist(WHOLEHOUSE)
+whole_house = gu.GETJSON(0)
+zone_list = gu.getzonelist(whole_house)
 
-# Write data to file
-utils.write_to_file(ZONE_LIST)
+device_list = []
 
-# Converts into arrays
-DATA = utils.convertzonelist(ZONE_LIST, WHOLEHOUSE)
+for zone in zone_list:
+    devices = zone_list[zone]['zone']
+    mode = zone_list[zone]['iMode']
+    key = zone_list[zone]['key']
+    current_temperature = None
+    target_temperature = None
 
-# before the 1 hour expiry:
-PASSES_TO_NEXT_REFRESH -= 1
-if PASSES_TO_NEXT_REFRESH <= 0:
-    USER = AUTH.refresh(USER['refreshToken'])
-    PASSES_TO_NEXT_REFRESH = REFRESH_LOOP
+    for device in devices.items():
+        device_id, device_raw = device
+        device_type = device_raw['type']
+        if device_type == 'Sensor':
+            current_temperature = device_raw['TEMPERATURE']
+        elif device_type == 'Radiator valve':
+            target_temperature = device_raw['HEATING_1']
 
-# Write to Firebase
-DATABASE.child("data").update(DATA, USER['idToken'])
+    if current_temperature and target_temperature:
+        print(zone, current_temperature, target_temperature)
+        device_list.append(key)
+
+
+for id in device_list:
+    print(id)
+    current_temperature, set_temperature, mode = gu.GET_TEMPERATURE(id)
+    print(id, current_temperature, set_temperature, mode)
