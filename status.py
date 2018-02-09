@@ -4,8 +4,7 @@ import config
 import utils
 
 
-gu = utils.GeniusUtility(config.HG_URL, config.HG_SIG,
-                         True, config.REFRESH_INTERVAL)
+gu = utils.GeniusUtility(config.HG_URL, config.HG_SIG)
 
 # List to hold results
 DEVICE_LIST = []

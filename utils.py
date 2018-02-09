@@ -19,9 +19,6 @@ class GeniusUtility():
             print("Reading from HTTP")
         self._refresh_interval = refresh_interval
 
-    # Payload to get status - this is just a guess but appears to work.
-    GET_STATUS = '{"iMode":0}'
-
     def getjsonfromhttp(self, identifier):
         """ gets the json from the supplied zone identifier """
         data = self.GETFULLJSON(identifier)
@@ -30,12 +27,16 @@ class GeniusUtility():
 
         return None
 
+    def GETURL(self, identifier):
+        """ Build URL from config and identifier """
+        return "http://" + self._host + ":1223/v3/zone/" + \
+            str(identifier) + "?sig=" + self._key
+
     def GETFULLJSON(self, identifier):
         """ gets the json from the supplied zone identifier """
-        url = "http://" + self._host + ":1223/v2/zone/" + \
-            str(identifier) + "?sig=" + self._key
+        url = self.GETURL(identifier)
         try:
-            response = requests.put(url, data=self.GET_STATUS)
+            response = requests.get(url)
             if response.status_code == 200:
                 return json.loads(response.text)
 
@@ -197,3 +198,54 @@ class GeniusUtility():
                     8: "away", 16: "boost", 32: "early", }
 
         return mode_map.get(mode, "off")
+
+    def SOCKET_ON(self, id, seconds):
+        data_to_send = '{"iMode":16,"iBoostTimeRemaining":' + \
+            str(seconds) + '}'
+        path = self.GETURL(id)
+        # HG_HEATING_SOCKET = HG_URL + "22" + HG_SIG
+        print(data_to_send)
+        print(path)
+        # requests.put(HG_HEATING_SOCKET, data=ON_DATA)
+        # requests.put()
+
+    def SOCKET_OFF(self, id):
+        self.SOCKET_ON(id, 0)
+
+    def CLEAR_TIMER(self, id):
+        path = self.GETURL(id)
+        # response = requests.options(path)
+        message = self.GETFULLJSON(id)
+        timer = message['ts']
+        payload = {'error': 0,
+                   'ts': timer,
+                   'tm': message['tm'],
+                   'data': {}
+                   }
+
+        for item in message['data']['objTimer']:
+            if item['iTm'] != 0:
+                message['data']['objTimer'].remove(item)
+
+        for item in message['data']['objTimer']:
+            if item['iTm'] != 0:
+                message['data']['objTimer'].remove(item)
+
+        for item in message['data']['objTimer']:
+            if item['iTm'] != 0:
+                message['data']['objTimer'].remove(item)
+
+        print(message)
+        print(payload)
+        response = requests.options(path)
+        # print(path, response)
+        response.headers['Access-Control-Request-Method'] = 'PATCH'
+        response = requests.patch(path, data=json.dumps(
+            payload), headers=response.headers)
+        print(path, response)
+        response = requests.options(path)
+        # print(path, response)
+        response.headers['Access-Control-Request-Method'] = 'GET'
+        response = requests.get(path, data=json.dumps(
+            message), headers=response.headers)
+        print(path, response)
