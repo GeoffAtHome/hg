@@ -1,8 +1,7 @@
 # HG_URL = Set this to the IP address of the Hub on
 # your local network. I.e. something like http://192.168.1.10
-HG_URL = "http://xxx.xxx.xxx.xxx"
-# HG_SIG = Set this to the API Signature value found
-# on the about page. Make sure this is correct otherwise the script will not work.
+HG_URL = "https://my.geniushub.co.uk/v1"
+# HG_SIG = to the token obtain from here: https://my.geniushub.co.uk/tokens
 HG_SIG = ""
 
 # FIREBASE_URL = Set this to the URL for where your data will be stored
@@ -15,7 +14,7 @@ REFRESH_INTERVAL = 60
 
 # Email address details
 FROM_ADDRESS = ''
-TO_ADDRESS  = ''
+TO_ADDRESS = ''
 USER_NAME = ''
 PASSWORD = ''
 

@@ -23,20 +23,21 @@ class GeniusUtility():
         """ gets the json from the supplied zone identifier """
         data = self.GETFULLJSON(identifier)
         if data != None:
-            return data['data']
+            return data
 
         return None
 
     def GETURL(self, identifier):
         """ Build URL from config and identifier """
-        return "http://" + self._host + ":1223/v3/zone/" + \
-            str(identifier) + "?sig=" + self._key
+        return self._host + identifier
 
     def GETFULLJSON(self, identifier):
         """ gets the json from the supplied zone identifier """
         url = self.GETURL(identifier)
         try:
-            response = requests.get(url)
+            headers = {'Authorization': 'Bearer ' + self._key}
+            response = requests.get(url, headers=headers)
+
             if response.status_code == 200:
                 return json.loads(response.text)
 

@@ -1,37 +1,42 @@
 ''' program to email when a battery is low (below THRESHOLD in config file) '''
 import smtplib
+import json
+import requests
 import config
-import utils
 
 
-gu = utils.GeniusUtility(config.HG_URL, config.HG_SIG)
+def getjson(identifier):
+    """ gets the json from the supplied zone identifier """
+    url = config.HG_URL + identifier
+    try:
+        headers = {'Authorization': 'Bearer ' + config.HG_SIG}
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            return json.loads(response.text)
+
+    except Exception as ex:
+        print("Failed requests in getjsonfromhttp")
+        print(ex)
+        return None
+
 
 # List to hold results
 DEVICE_LIST = []
 BAD_LIST = []
-ZONES = gu.GETJSON(0)['mappings']
+DEVICES = getjson('/devices')
 # Find the zones
-for value in ZONES.items():
-    data = gu.GETJSON(value[0])
-    if data != None:
-        room = data['strName']
-        nodes = data['nodes']
-        for node in nodes:
-            node_id = node['addr']
-            if 'Battery' in node['childValues']:
-                if 'LUMINANCE' in node['childValues']:
-                    device = "Room Sensor"
-                elif 'HEATING_1' in node['childValues']:
-                    device = "Radiator Valve"
-                else:
-                    device = "Unknown device"
-
-                text = node_id + ": " + device + " in " + room
-                level = node['childValues']['Battery']['val']
-                text = text + " Battery level: " + str(level)
-                DEVICE_LIST.append(text)
-                if level < config.THRESHOLD:
-                    BAD_LIST.append(text)
+for value in DEVICES:
+    room = value['assignedZones'][0]['name']
+    devicetype = value['type']
+    node_id = value['id']
+    if 'batteryLevel' in value['state']:
+        text = node_id + ": " + devicetype + " in " + room
+        level = value['state']['batteryLevel']
+        text = text + " Battery level: " + str(level)
+        DEVICE_LIST.append(text)
+        if level < config.THRESHOLD:
+            BAD_LIST.append(text)
 
 # Print sorted list
 DEVICE_LIST = sorted(DEVICE_LIST, key=lambda x: int(x.split(':')[0]))
