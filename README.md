@@ -2,6 +2,7 @@ Python Genius
 =============
 
 A set of python scripts to help with your Genius heating hub. See https://www.geniushub.co.uk/ for details
+Some of these scripts have been update to use the public API which can be found here: https://my.geniushub.co.uk/docs
 
 How To Use
 ----------
@@ -18,9 +19,19 @@ How To Use
 * Status.py when run will email you the nodes in your network when a battery is below the THRESHOLD set in the configuration.
 * The reason for writing this is so that I can be emailed when the batteries require changing rather than finding out when something isn't working.
 * The Genius hub does provide this information but I don't look at this often. My usage is once it is configured leave it alone. 
-* If I need to override I tend to do this with Alex via IFTTT.
 * Run `py status.py`
 * I run with daily with a scheduler at around 04:00 everyday.
+
+### room_temperatures.py
+
+* room_temperatures.py when run lists all the temperatures found on the hub
+* Run `room_temperatures.py`
+
+### switches.py
+
+* switches.py when run lists all the switches found on the hub
+* Run `switches.py`
+
 
 ### Mirror.py
 * Mirror.py publishes the Genius hub setting to Firebase.

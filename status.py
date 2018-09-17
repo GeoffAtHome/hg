@@ -3,30 +3,20 @@ import smtplib
 import json
 import requests
 import config
+import utils
 
-
-def getjson(identifier):
-    """ gets the json from the supplied zone identifier """
-    url = config.HG_URL + identifier
-    try:
-        headers = {'Authorization': 'Bearer ' + config.HG_SIG}
-        response = requests.get(url, headers=headers)
-
-        if response.status_code == 200:
-            return json.loads(response.text)
-
-    except Exception as ex:
-        print("Failed requests in getjsonfromhttp")
-        print(ex)
-        return None
-
+# Load the utils
+gu = utils.GeniusUtility(config.HG_SIG)
 
 # List to hold results
 DEVICE_LIST = []
 BAD_LIST = []
-DEVICES = getjson('/devices')
-# Find the zones
-for value in DEVICES:
+
+# Find the devices with batteries
+devices = filter(
+    lambda device: 'batteryLevel' in device['state'], gu.getjson('/devices'))
+
+for value in devices:
     room = value['assignedZones'][0]['name']
     devicetype = value['type']
     node_id = value['id']

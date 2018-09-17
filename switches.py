@@ -7,12 +7,13 @@ import utils
 # Load the utils
 gu = utils.GeniusUtility(config.HG_SIG)
 
-# Get the rooms with temperatures
-rooms = filter(lambda zone: 'temperature' in zone, gu.getjson('/zones'))
+# Get rooms with switches
+switches = filter(lambda zone: zone['type']
+                  == 'on / off', gu.getjson('/zones'))
 
 # Build up the text
-DEVICE_LIST = map(lambda room: str(
-    room['id']) + ": temperature in " + room['name'] + " is " + str(room['temperature']), rooms)
+DEVICE_LIST = map(lambda switch: str(switch['id']) + ": switch " +
+                  switch['name'] + " is " + switch['mode'], switches)
 
 # Print list
 for result in DEVICE_LIST:
