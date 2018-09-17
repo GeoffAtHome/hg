@@ -1,12 +1,15 @@
-''' program to print active zone ID's '''
+''' program to turn a socket on and off '''
+''' change device_id as necessary '''
 import config
 import utils
 
-# gu = utils.GeniusUtility(config.HG_URL, config.HG_SIG, True)
-gu = utils.GeniusUtility(config.HG_URL, config.HG_SIG)
+gu = utils.GeniusUtility(config.HG_SIG)
 
-ZONE = 23
+device_id = 23
 
-# gu.SOCKET_ON(ZONE, 900)
-# gu.SOCKET_OFF(ZONE)
-gu.CLEAR_TIMER(ZONE)
+# Turn socket on
+gu.putjson('/zones/' + str(device_id) + '/mode', 'override')
+
+
+# Turn socket off
+gu.putjson('/zones/' + str(device_id) + '/mode', 'off')
